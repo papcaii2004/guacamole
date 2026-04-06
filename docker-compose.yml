@@ -3,6 +3,7 @@ services:
   # Init container: generate DB schema then exit
   init-guac-db:
     image: guacamole/guacamole
+    user: root
     entrypoint: /bin/sh
     command: -c "/opt/guacamole/bin/initdb.sh --postgresql > /initdb/initdb.sql"
     volumes:
