@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:guacamole.apache.org)",
+      "Bash(curl -s \"https://guacamole.apache.org/doc/gug/guacamole-docker.html\")",
+      "Bash(sed 's/<[^>]*>//g')",
+      "Bash(curl -s \"https://guacamole.apache.org/doc/gug/postgresql-auth.html\")"
+    ]
+  }
+}

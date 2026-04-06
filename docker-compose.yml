@@ -1,0 +1,47 @@
+services:
+
+  # Init container: generate DB schema then exit
+  init-guac-db:
+    image: guacamole/guacamole
+    entrypoint: /bin/sh
+    command: -c "/opt/guacamole/bin/initdb.sh --postgresql > /initdb/initdb.sql"
+    volumes:
+      - dbinit:/initdb
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    depends_on:
+      init-guac-db:
+        condition: service_completed_successfully
+    environment:
+      POSTGRES_DB: guacamole_db
+      POSTGRES_USER: guacamole_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - dbinit:/docker-entrypoint-initdb.d:ro
+      - dbdata:/var/lib/postgresql/data
+
+  guacd:
+    image: guacamole/guacd
+    restart: unless-stopped
+
+  guacamole:
+    image: guacamole/guacamole
+    restart: unless-stopped
+    depends_on:
+      - postgres
+      - guacd
+    ports:
+      - "3389:8080"
+    environment:
+      GUACD_HOSTNAME: guacd
+      POSTGRESQL_HOSTNAME: postgres
+      POSTGRESQL_DATABASE: guacamole_db
+      POSTGRESQL_USER: guacamole_user
+      POSTGRESQL_PASSWORD: ${POSTGRES_PASSWORD}
+      WEBAPP_CONTEXT: ROOT
+
+volumes:
+  dbinit:
+  dbdata:
